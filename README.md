@@ -10,7 +10,7 @@ https://www.synology.com/fr-fr/products?product_line=ds_j%2Cds_plus%2Cds_value%2
 4. Option installer Editeur de texte
 5. Si vous souhaitez utiliser l'application en dehors de chez vous, il faut utiliser un nom de domaine avec un proxy inversé (celui du nas fait très bien l'affaire)
 Des tutoriels sont disponible pour creer un proxy inversé
-  # Installation
+  # Installation 
   
 1. Creer le dossier docker à la racine de preference si ce n'est pas deja fait
 2. Creer une tache en utilisateur root en script utilisateur
