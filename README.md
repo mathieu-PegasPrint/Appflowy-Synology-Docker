@@ -34,5 +34,46 @@ listen 8090;
  - postgres_data
 5. On modifie le fichier deploy.env qu'on copie en fichier .env
 6. On modifie le fichier docker-compose.yml
+   
+   Les changements :
+   - service nginx port d'écoute
+    ports:
+      - 8090:8090
+   - Montage des dossiers minio_data et postgres_data
+```
+minio:
+    restart: on-failure
+    image: minio/minio
+    environment:
+      - MINIO_BROWSER_REDIRECT_URL=${APPFLOWY_BASE_URL?:err}/minio
+      - MINIO_ROOT_USER=${APPFLOWY_S3_ACCESS_KEY:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${APPFLOWY_S3_SECRET_KEY:-minioadmin}
+    command: server /data --console-address ":9001"
+    volumes:
+      - /volume1/docker/AppFlowy-Cloud/minio_data:/data
 
-  
+  postgres:
+    restart: on-failure
+    image: pgvector/pgvector:pg16
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
+      - SUPABASE_PASSWORD=${SUPABASE_PASSWORD:-root}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - ./migrations/before:/docker-entrypoint-initdb.d
+      - /volume1/docker/AppFlowy-Cloud/postgres_data:/var/lib/postgresql/data
+```
+7. On creer une nouvelle tache en script utilisateur root
+```
+#!/bin/bash
+cd /volume1/docker/AppFlowy-Cloud
+docker-compose pull && docker-compose up -d
+```
+Voilà votre application est en route http://IP_NAS:8090
